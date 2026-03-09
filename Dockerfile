@@ -1,27 +1,23 @@
-# Use a slim Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+FROM python:3.13-slim
 
-# Set working directory
 WORKDIR /app
 
-# Enable bytecode compilation
-ENV UV_COMPILE_BYTECODE=1
+# install system dependencies for opencv
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libxcb1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY . /app/
+COPY requirements.txt pyproject.toml ./
 
-# Create the from-root marker if missing (ensuring logger works)
-RUN touch .from-root
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install dependencies using uv sync
-RUN uv sync --frozen --no-dev
+COPY . .
 
-# Expose the application port
 EXPOSE 8000
 
-# Set environment variables
-ENV HOST=0.0.0.0
-ENV PORT=8000
-
-# Run the application
-CMD ["uv", "run", "main.py"]
+CMD ["uvicorn","main:app","--host","0.0.0.0","--port","8000"]

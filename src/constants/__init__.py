@@ -1,6 +1,7 @@
 import torch
+import os
 S3_CLIENT="s3"
-BUCKET_NAME="photoshopml"
+BUCKET_NAME=os.getenv("S3_BUCKET_NAME","photoshopml")
 
 DEVICE="cuda" if torch.cuda.is_available() else "cpu"
 
